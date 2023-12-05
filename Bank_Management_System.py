@@ -105,10 +105,11 @@ class User_Account(Bank):
         super().__init__(name, email, address, account_type)
 
 
-class Admin_Account(Bank):
-    def __init__(self, name, email, address, account_type):
-        super().__init__(name, email, address, account_type)
+class Admin_Account:
     
+    def __init__(self, name, password):
+        self.name = name
+        self.password = password
     
     def delete_account(self, name, email, account_type):
         temp_account = account_type + name + email
@@ -138,7 +139,6 @@ class Admin_Account(Bank):
         elif switch == "on":
             Bank.loanOff = False
 
-
     def bankrupt_switch(self, switch):
         if switch == "off":
             Bank.bankrupt = True
@@ -148,39 +148,99 @@ class Admin_Account(Bank):
 
 
 current_user = None
+admin = Admin_Account("admin", "@1234")
 
 while(True):
     if current_user == None:
-        print("\nNo Logged in")
-        ch = input("Log in or Registration? (L/R)")
+        option = input("\n1. ADMIN\n2. USER\n3. EXIT\nEnter your choice: ")
+        if option == "1":
+            print(f"ADMIN ID: {admin.name}, ADMIN PASSWORD: {admin.password}")
+            id = input("Enter id: ")
+            password = input("Enter password: ")
+            if id == admin.name and password == admin.password:
+                current_user = admin
+            else:
+                print("Wrong id or password")
 
-        if ch == "R":
-            name = input("Enter your name: ")
-            email = input("Enter your email: ")
-            address = input("Enter your address: ")
-            accountType = input("Enter your account type (User or Admin): ")
+        elif option == "2":
+            ch = input("Log in or Registration? (L/R)")
+            
+            if ch == "R":
+                name = input("Enter your name: ")
+                email = input("Enter your email: ")
+                address = input("Enter your address: ")
+                accountType = input("Enter your account type (Write 'Savings'): ")
 
-            if accountType == "User":
                 current_user = User_Account(name, email, address, accountType)
-            elif accountType == "Admin":
-                current_user = Admin_Account(name, email, address, accountType)
 
-        elif ch == "L":
-            name = input("Enter your name: ")
-            email = input("Enter your email: ")
-            accountType = input("Enter your account type (User or Admin): ")
-            temp_account = accountType + name + email
+            elif ch == "L":
+                name = input("Enter your name: ")
+                email = input("Enter your email: ")
+                accountType = input("Enter your account type (Write 'Savings'): ")
+                temp_account = accountType + name + email
 
-            found = False
-            for account in Bank.account_list:
-                if temp_account == account.account_number:
-                    current_user = account
-                    found = True
-                    break
-            if found == False:
-                print("This user is not available.")
+                found = False
+                for account in Bank.account_list:
+                    if temp_account == account.account_number:
+                        current_user = account
+                        found = True
+                        break
+                
+                if found == False:
+                    print("This user is not available.")
+        
+        elif option == "3":
+            current_user = None
+            break
+
     else:
-        if current_user.account_type == "User":
+        if current_user == admin:
+            print(f"\nWelcome {current_user.name}\n")
+            print("0. Create Account")
+            print("1. Delete Account")
+            print("2. See All User Account Lists")
+            print("3. Total Available Balance of the Bank")
+            print("4. Total Available Loan Amount of the Bank")
+            print("5. Control Loan Option")
+            print("6. Control 'Bankrupt'")
+            print("7. Logout")
+            op = input("Choose Option: ")
+            if op == "0":
+                name = input("Enter user's name: ")
+                email = input("Enter user's email: ")
+                address = input("Enter user's address: ")
+                accountType = input("Enter user's account type (Write 'Savings'): ")
+                User_Account(name, email, address, accountType)
+
+            elif op == "1":
+                name = input("Enter account name: ")
+                email = input("Enter account email: ")
+                accountType = input("Enter account type (Write 'Savings'): ")
+
+                current_user.delete_account(name, email, accountType)
+
+            elif op == "2":
+                current_user.see_all_account()
+
+            elif op == "3":
+                current_user.total_bank_balance()
+
+            elif op == "4":
+                current_user.total_loan_amount()
+
+            elif op == "5":
+                switch = input("on or off: ")
+                current_user.loan_switch(switch)
+
+            elif op == "6":
+                switch = input("on or off: ")
+                current_user.bankrupt_switch(switch)
+
+            elif op == "7":
+                current_user = None
+
+
+        elif current_user.account_type == "Savings":
             print(f"\nWelcome {current_user.name}\n")
             print("1. Deposit")
             print("2. Withdraw")
@@ -211,7 +271,7 @@ while(True):
             elif op == "6":
                 name = input("Enter account name: ")
                 email = input("Enter account email: ")
-                accountType = input("Enter account type (User or Admin): ")
+                accountType = input("Enter account type (Write 'Savings'): ")
                 amount = int(input("Enter amount: "))
                 current_user.trasnfer_amount(name, email, accountType, amount)
 
@@ -219,39 +279,4 @@ while(True):
                 current_user = None
 
 
-        elif current_user.account_type == "Admin":
-            print(f"\nWelcome {current_user.name}\n")
-            print("1. Delete Account")
-            print("2. See All User Account Lists")
-            print("3. Total Available Balance of the Bank")
-            print("4. Total Available Loan Amount of the Bank")
-            print("5. Control Loan Option")
-            print("6. Control 'Bankrupt'")
-            print("7. Logout")
-            op = input("Choose Option: ")
-            if op == "1":
-                name = input("Enter account name: ")
-                email = input("Enter account email: ")
-                accountType = input("Enter account type (User or Admin): ")
-
-                current_user.delete_account(name, email, accountType)
-
-            elif op == "2":
-                current_user.see_all_account()
-
-            elif op == "3":
-                current_user.total_bank_balance()
-
-            elif op == "4":
-                current_user.total_loan_amount()
-
-            elif op == "5":
-                switch = input("on or off: ")
-                current_user.loan_switch(switch)
-
-            elif op == "6":
-                switch = input("on or off: ")
-                current_user.bankrupt_switch(switch)
-
-            elif op == "7":
-                current_user = None
+        
